@@ -1,0 +1,11 @@
+
+
+firebase login
+  -> 
+
+
+ firebase init functions
+
+    spaceで、選択
+
+firebase deploy --only functions
