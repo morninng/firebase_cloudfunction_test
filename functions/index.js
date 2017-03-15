@@ -16,6 +16,6 @@ exports.addMessage = firebase_sample.addMessage;
 exports.makeUppercase = firebase_sample.makeUppercase;
 
 
-
+exports.joinroom_que_monitor = firebase_sample.joinroom_que_monitor;
 
 

@@ -1,4 +1,5 @@
 var functions = require('firebase-functions');
+require('@google-cloud/debug-agent').start();
 const admin = require('firebase-admin');
 
 
@@ -32,9 +33,24 @@ firebase_sample.hello_monitor = functions.database.ref('/hello')
       console.log('next_value', next_value);
       
       if(event.data.previous.exists()){
-        console.log("previous value is ", event.data.previous.exists());
+        console.log("previous value is ", event.data.previous.val());
+        console.log("event", event);
       }
+      return;
+    });
 
+
+
+firebase_sample.joinroom_que_monitor = functions.database.ref('/event_related/join_room_que/{room_name}/{user_id}')
+    .onWrite(event => {
+      // Only edit data when it is first created.
+      if(!event.data.exists()){
+        return;
+      }
+      setTimeout(()=>{
+        const room_que_ref = event.data.ref;
+        room_que_ref.set(null);
+      },10);
       return;
     });
 
