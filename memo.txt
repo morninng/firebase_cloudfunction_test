@@ -9,3 +9,13 @@ firebase login
     spaceで、選択
 
 firebase deploy --only functions
+
+ https://us-central1-cloud-function-test-2a593.cloudfunctions.net/store_token?token=4/spDem8DBCMBJIJg7AeU-zBLsrNGrgPy-s0vurXSPGL0
+
+ https://us-central1-cloud-function-test-2a593.cloudfunctions.net/store_token?token=4/NQArrmA6H-hk33qKZeia1IB4XkVG6U5Jt-EWkWKqfr8
+ https://us-central1-cloud-function-test-2a593.cloudfunctions.net/store_token?token=4/uXCN6Jc-hixWShc-Y-hGoujjaalSMi8uzoMk6XNezsQ
+
+ 4/NQArrmA6H-hk33qKZeia1IB4XkVG6U5Jt-EWkWKqfr8
+ 4/uXCN6Jc-hixWShc-Y-hGoujjaalSMi8uzoMk6XNezsQ
+
+ 

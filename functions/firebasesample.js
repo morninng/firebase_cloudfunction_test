@@ -92,4 +92,47 @@ firebase_sample.makeUppercase = functions.database.ref('/messages/{pushId}/origi
       return event.data.ref.parent.child('uppercase').set(uppercase);
     });
 
+
+
+
+firebase_sample.eventparticipate_monitor = functions.database.ref('/event_related/event/{event_id}/participants/{user_id}')
+    .onWrite(event => {
+      console.log("user participate event with userid " + event.params.user_id  + " event id " +  event.params.event_id);
+      const user_event_ref = "/users/my_event/" + event.params.user_id + "/" + event.params.event_id;
+      const participate_value = event.data.val()
+      console.log("participate_value is" + participate_value);
+
+      let user_event_data = null;
+      if(!event.data.exists()){
+        console.log("no data for user participant");
+        set_data(user_event_ref, null);
+      }else{
+        const event_starttime_ref = "/event_related/event/" + event.params.event_id + "/date_time_start";
+        return admin.database().ref(event_starttime_ref).once("value", (snapshot)=>{
+          const start_time = snapshot.val();
+          console.log("start time is", start_time);
+          if(participate_value && start_time){
+            user_event_data = {
+              type:participate_value,
+              date_time_start: start_time
+            }
+          }
+          set_data(user_event_ref, user_event_data)
+        })
+      }
+    });
+
+function set_data(ref, data){
+    console.log(ref);
+    console.log(data);
+    return admin.database().ref(ref).set(data).then((snapshot) => {
+      console.log("data is set" + ref + " - " + data);
+      return;
+    }).catch(()=>{
+      console.log("saving data fail" + ref + " - " + data);
+      return;
+    });
+}
+
+
 module.exports = firebase_sample;
