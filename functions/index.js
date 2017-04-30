@@ -25,24 +25,10 @@ exports.joinroom_que_monitor = firebase_sample.joinroom_que_monitor;
 
 exports.get_auth_url = functions.https.onRequest((req, res) => {
 
-    console.log("client_secret", client_secret);
-    console.log("client_secret.installed", client_secret.installed);
-    if(!client_secret || !client_secret.installed){
-        res.send("client_secret cannot be found");
-        return;
-    }
-    var clientSecret = client_secret.installed.client_secret;
-    console.log("clientSecret", clientSecret);
-    var clientId = client_secret.installed.client_id;
-    console.log("clientId", clientId);
-    var redirectUrl = client_secret.installed.redirect_uris[0];
-    console.log("redirectUrl", redirectUrl);
-    if(!clientId || !clientSecret || !redirectUrl){
+    const oauth2Client = get_oauth2Client();
+    if(!oauth2Client){
         res.send("client_secret is not proper");
-        return;
     }
-    var auth = new googleAuth();
-    const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
     var authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES
@@ -57,25 +43,17 @@ exports.store_token = functions.https.onRequest((req, res)=>{
 
     const token_code = req.query.token;
 
-
-    var clientSecret = client_secret.installed.client_secret;
-    console.log("clientSecret", clientSecret);
-    var clientId = client_secret.installed.client_id;
-    console.log("clientId", clientId);
-    var redirectUrl = client_secret.installed.redirect_uris[0];
-    console.log("redirectUrl", redirectUrl);
-    if(!clientId || !clientSecret || !redirectUrl){
+    const oauth2Client = get_oauth2Client();
+    if(!oauth2Client){
         res.send("client_secret is not proper");
-        return;
     }
-    var auth = new googleAuth();
-    const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-    oauth2Client.getToken(token_code, function(err, token_store) {
+    oauth2Client.getToken(token_code, (err, token_store) => {
         if (err) {
             console.log('Error while trying to retrieve access token', err);
+            res.send("Error while trying to retrieve access token");
             return;
         }
-        console.log("token", token_store);
+        console.log("token_store", token_store);
 
         const token_ref = "/admin/google_token/";
 
@@ -98,23 +76,6 @@ exports.store_token = functions.https.onRequest((req, res)=>{
 
 exports.listEvents = functions.https.onRequest((req, res)=>{
 
-    var clientSecret = client_secret.installed.client_secret;
-    console.log("clientSecret", clientSecret);
-    var clientId = client_secret.installed.client_id;
-    console.log("clientId", clientId);
-    var redirectUrl = client_secret.installed.redirect_uris[0];
-    console.log("redirectUrl", redirectUrl);
-    if(!clientId || !clientSecret || !redirectUrl){
-        res.send("client_secret is not proper");
-        return;
-    }
-    var auth = new googleAuth();
-    const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-    var authUrl = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES
-    });
-
     const token_ref = "/admin/google_token/";
     admin.database().ref(token_ref).once("value", 
         (token_snapshot)=> {
@@ -124,7 +85,10 @@ exports.listEvents = functions.https.onRequest((req, res)=>{
                 res.send("no token exist");
                 return;
             }
-            console.log("oauth2Client", oauth2Client);
+            const oauth2Client = get_oauth2Client();
+            if(!oauth2Client){
+                res.send("client_secret is not proper");
+            }
             oauth2Client.credentials = token;
             listEvents_execute(req, res, oauth2Client);
         },
@@ -133,6 +97,26 @@ exports.listEvents = functions.https.onRequest((req, res)=>{
             return;
         });
 });
+
+
+function get_oauth2Client(){
+
+    if(!client_secret || !client_secret.installed){
+        console.log("slient_secret does not exist");
+        return null;
+    }
+    var clientSecret = client_secret.installed.client_secret;
+    var clientId = client_secret.installed.client_id;
+    var redirectUrl = client_secret.installed.redirect_uris[0];
+    if(!clientId || !clientSecret || !redirectUrl){
+        res.send("client_secret is not proper");
+        return null;
+    }
+    var auth = new googleAuth();
+    const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+    return oauth2Client;
+}
+
 
 
 function listEvents_execute(req, res, auth){
